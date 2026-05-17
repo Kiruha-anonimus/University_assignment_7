@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аудит безопасности - Задание 7 | u82360</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 40px 20px;
+            color: #1e1e1e;
+        }
+
+        .report-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            border: 2px solid #000;
+            box-shadow: 12px 12px 0 rgba(0,0,0,0.05);
+        }
+
+        .report-header {
+            border-bottom: 3px solid #000;
+            padding: 30px;
+            background: #fafafa;
+        }
+
+        .report-header h1 {
+            font-size: 28px;
+            letter-spacing: -1px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .report-header p {
+            margin-top: 12px;
+            color: #333;
+            font-size: 16px;
+            border-left: 4px solid #000;
+            padding-left: 16px;
+        }
+
+        .login-badge {
+            display: inline-block;
+            background: #000;
+            color: #fff;
+            padding: 6px 14px;
+            font-family: monospace;
+            font-size: 18px;
+            margin-top: 16px;
+            letter-spacing: 1px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .vuln-section {
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .vuln-title {
+            font-size: 24px;
+            font-weight: 700;
+            background: #000;
+            color: #fff;
+            display: inline-block;
+            padding: 8px 20px;
+            margin-bottom: 20px;
+            font-family: monospace;
+        }
+
+        .vuln-description {
+            background: #f4f4f4;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #000;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .code-block code {
+            color: #d4d4d4;
+        }
+
+        .badge-safe {
+            background: #2e7d32;
+            color: white;
+            padding: 4px 12px;
+            display: inline-block;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        .badge-fixed {
+            background: #1976d2;
+            color: white;
+            padding: 4px 12px;
+            display: inline-block;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        .footer-note {
+            margin-top: 30px;
+            border-top: 2px solid #000;
+            padding: 24px 30px;
+            background: #faf9f8;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        h3 {
+            margin: 20px 0 10px 0;
+            font-size: 18px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+<div class="report-container">
+    <div class="report-header">
+        <h1>АУДИТ БЕЗОПАСНОСТИ</h1>
+        <p>Задание 7: Выявление и устранение уязвимостей веб-приложения<br>
+        XSS | SQL Injection | CSRF | Information Disclosure | Include | File Upload</p>
+        <div class="login-badge">Работу выполнил: Копылов Кирилл</div>
+    </div>
+
+    <div class="content">
+
+        <!-- ==================== XSS ==================== -->
+        <div class="vuln-section">
+            <div class="vuln-title">🔴 XSS (Cross-Site Scripting)</div>
+            
+            <div class="vuln-description">
+                <strong>🔍 Описание уязвимости:</strong><br>
+                XSS позволяет злоумышленнику внедрить вредоносный JavaScript-код в страницу, который выполнится в браузере другого пользователя. Например, при вводе в поле ФИО кода <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code> он может быть выполнен.
+            </div>
+
+            <strong>✅ Метод защиты:</strong>
+            <div class="code-block">
+<code>// Использование htmlspecialchars() при выводе любых данных от пользователя
+&lt;?= htmlspecialchars($userData['full_name'] ?? '', ENT_QUOTES, 'UTF-8') ?&gt;
+
+// Пример из index.php
+&lt;input type="text" name="full_name" value="&lt;?= htmlspecialchars($userData['full_name'] ?? '', ENT_QUOTES, 'UTF-8') ?&gt;"&gt;</code>
+            </div>
+
+            <strong>📁 Где применено:</strong>
+            <ul style="margin-left: 30px; margin-top: 10px;">
+                <li><code>index.php</code> — все выводимые поля обёрнуты в <code>htmlspecialchars()</code></li>
+                <li><code>admin/admin.php</code> — все данные пользователя экранируются</li>
+                <li><code>login.php</code> — сообщения об ошибках экранируются</li>
+            </ul>
+        </div>
+
+        <!-- ==================== SQL Injection ==================== -->
+        <div class="vuln-section">
+            <div class="vuln-title">🔴 SQL Injection</div>
+            
+            <div class="vuln-description">
+                <strong>🔍 Описание уязвимости:</strong><br>
+                SQL Injection позволяет злоумышленнику внедрить произвольный SQL-код в запрос к базе данных, что может привести к чтению, изменению или удалению данных.
+            </div>
+
+            <strong>✅ Метод защиты:</strong>
+            <div class="code-block">
+<code>// Использование подготовленных запросов (prepared statements)
+$stmt = $pdo->prepare("SELECT * FROM applications WHERE id = ?");
+$stmt->execute([$id]);
+
+// Пример из save.php
+$stmt = $pdo->prepare("INSERT INTO applications 
+    (login, password_hash, full_name, phone, email, birth_date, gender, biography, contract_agreed) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+$stmt->execute([$generatedLogin, $hashedPassword, $full_name, $phone, $email, $birth_date, $gender, $biography, $contract]);</code>
+            </div>
+
+            <strong>📁 Где применено:</strong>
+            <ul style="margin-left: 30px; margin-top: 10px;">
+                <li><code>save.php</code> — все запросы через <code>prepare()</code></li>
+                <li><code>auth.php</code> — запрос логина через <code>prepare()</code></li>
+                <li><code>admin/admin.php</code> — SELECT, UPDATE, DELETE через <code>prepare()</code></li>
+            </ul>
+        </div>
+
+        <!-- ==================== CSRF ==================== -->
+        <div class="vuln-section">
+            <div class="vuln-title">🔴 CSRF (Cross-Site Request Forgery)</div>
+            
+            <div class="vuln-description">
+                <strong>🔍 Описание уязвимости:</strong><br>
+                CSRF позволяет злоумышленнику отправить запрос от имени авторизованного пользователя без его ведома, например, изменить данные анкеты.
+            </div>
+
+            <strong>✅ Метод защиты:</strong>
+            <div class="code-block">
+<code>// Генерация CSRF-токена (index.php)
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+// Добавление токена в форму
+&lt;input type="hidden" name="csrf_token" value="&lt;?= $_SESSION['csrf_token'] ?&gt;"&gt;
+
+// Проверка токена (save.php)
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+    die("Ошибка CSRF: неверный токен");
+}</code>
+            </div>
+
+            <strong>📁 Где применено:</strong>
+            <ul style="margin-left: 30px; margin-top: 10px;">
+                <li><code>index.php</code> — генерация и вставка CSRF-токена в форму</li>
+                <li><code>save.php</code> — проверка CSRF-токена перед обработкой</li>
+            </ul>
+        </div>
+
+        <!-- ==================== Information Disclosure ==================== -->
+        <div class="vuln-section">
+            <div class="vuln-title">🔴 Information Disclosure</div>
+            
+            <div class="vuln-description">
+                <strong>🔍 Описание уязвимости:</strong><br>
+                Информация об ошибках (пути к файлам, структура БД, SQL-запросы) может быть показана пользователю, что помогает злоумышленнику в атаке.
+            </div>
+
+            <strong>✅ Метод защиты:</strong>
+            <div class="code-block">
+<code>// Отключение показа ошибок на продакшене
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', '/home/u82360/logs/php_errors.log');
+
+// В catch-блоках не выводим детали ошибок
+catch (Exception $e) {
+    error_log($e->getMessage());
+    $_SESSION['form_errors'] = ['database' => "Ошибка сохранения данных"];
+}</code>
+            </div>
+
+            <strong>📁 Где применено:</strong>
+            <ul style="margin-left: 30px; margin-top: 10px;">
+                <li><code>index.php</code> — отключен display_errors</li>
+                <li><code>save.php</code> — ошибки пишутся в лог, пользователю показывается общее сообщение</li>
+                <li><code>auth.php</code> — ошибки БД не выводятся на экран</li>
+                <li><code>admin/admin.php</code> — аналогично</li>
+            </ul>
+        </div>
+
+        <!-- ==================== Include ==================== -->
+        <div class="vuln-section">
+            <div class="vuln-title">🔴 Include (LFI/RFI)</div>
+            
+            <div class="vuln-description">
+                <strong>🔍 Описание уязвимости:</strong><br>
+                Если в коде используется динамическое включение файлов (<code>include($_GET['page'])</code>), злоумышленник может подключить произвольные файлы с сервера или удалённые скрипты.
+            </div>
+
+            <strong>✅ Проверка кода:</strong>
+            <div class="code-block">
+<code>// В проекте НЕТ использования include/require с переменными
+// Все include используют константные пути
+
+// Пример из кода (безопасно):
+include 'config.php';  // константный путь
+require_once 'functions.php';  // константный путь</code>
+            </div>
+
+            <strong>📁 Результат проверки:</strong>
+            <ul style="margin-left: 30px; margin-top: 10px;">
+                <li>В проекте нет динамических <code>include</code>/<code>require</code></li>
+                <li>Уязвимость отсутствует</li>
+            </ul>
+        </div>
+
+        <!-- ==================== File Upload ==================== -->
+        <div class="vuln-section">
+            <div class="vuln-title">🔴 File Upload</div>
+            
+            <div class="vuln-description">
+                <strong>🔍 Описание уязвимости:</strong><br>
+                Если есть форма загрузки файлов, злоумышленник может загрузить вредоносный PHP-файл и выполнить его на сервере.
+            </div>
+
+            <strong>✅ Результат проверки:</strong>
+            <div class="code-block">
+<code>// В проекте НЕТ функционала загрузки файлов
+// Форма анкеты не содержит input type="file"</code>
+            </div>
+
+            <ul style="margin-left: 30px; margin-top: 10px;">
+                <li>Функционал загрузки файлов не реализован</li>
+                <li>Уязвимость не актуальна для данного приложения</li>
+            </ul>
+        </div>
+
+        <!-- ==================== ИТОГОВАЯ ТАБЛИЦА ==================== -->
+        <div class="vuln-section">
+            <div class="vuln-title">📊 ИТОГОВАЯ ТАБЛИЦА</div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Уязвимость</th>
+                        <th>Статус</th>
+                        <th>Метод защиты</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>XSS</td>
+                        <td style="color: green;">✅ Исправлена</td>
+                        <td>htmlspecialchars() при выводе</td>
+                    </tr>
+                    <tr>
+                        <td>SQL Injection</td>
+                        <td style="color: green;">✅ Исправлена</td>
+                        <td>Подготовленные запросы (PDO prepare)</td>
+                    </tr>
+                    <tr>
+                        <td>CSRF</td>
+                        <td style="color: green;">✅ Исправлена</td>
+                        <td>CSRF-токен в форме и его проверка</td>
+                    </tr>
+                    <tr>
+                        <td>Information Disclosure</td>
+                        <td style="color: green;">✅ Исправлена</td>
+                        <td>display_errors = 0, логирование ошибок</td>
+                    </tr>
+                    <tr>
+                        <td>Include (LFI/RFI)</td>
+                        <td style="color: green;">✅ Безопасно</td>
+                        <td>Нет динамических include/require</td>
+                    </tr>
+                    <tr>
+                        <td>File Upload</td>
+                        <td style="color: green;">✅ Не актуально</td>
+                        <td>Функционал загрузки файлов отсутствует</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="vuln-description" style="background: #e8f5e9; border-left-color: green;">
+                <strong>🎯 Заключение:</strong> Все выявленные уязвимости устранены. Приложение соответствует базовым требованиям безопасности веб-разработки.
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer-note">
+        ⚡ Аудит безопасности выполнен для веб-приложения "Анкета разработчика"<br>
+        Репозиторий: https://github.com/Kiruha-anonimus/University_assignment_7<br>
+        Дата проверки: 2026-05-17 | Версия: 1.0 (защищённая)
+    </div>
+</div>
+</body>
+</html>
